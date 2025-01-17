@@ -10,3 +10,6 @@ server:
     threads:
       max: 50
       min-spare: 5
+
+polar: #bulid 폴더의 META-INF 폴더 안에 자동 생성되어 있음!
+  greeting: Weclome to local book catalog!
