@@ -23,6 +23,10 @@ configurations {
 	}
 }
 
+ext {
+	set('springCloudVersion', "2024.0.0") // 출시 연도로 스프링 클라우드 버전 정의.
+}
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -30,6 +34,15 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	testImplementation 'org.springframework.boot:spring-boot-starter-webflux'
 	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+	implementation 'org.springframework.cloud:spring-cloud-starter-config'
+	implementation 'org.springframework.retry:spring-retry'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	}
 }
 
 bootRun {
