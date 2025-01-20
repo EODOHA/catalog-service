@@ -19,11 +19,16 @@ jobs:
           java-version: 17
           cache: gradle  
 
-      # Config 서버 URL 설정 부분을 조건부로 실행
-      - name: Set environment variable for Config Server URL
-        if: ${{ secrets.CONFIG_SERVER_URL != '' }}
+      # Config 서버 URL을 환경 변수로 설정
+      - name: Set Config Server URL as environment variable
         run: |
-          echo "SPRING_CLOUD_CONFIG_URI=${{ secrets.CONFIG_SERVER_URL }}" >> $GITHUB_ENV
+          echo "CONFIG_SERVER_URL=${{ secrets.CONFIG_SERVER_URL }}" >> $GITHUB_ENV
+
+      # Config 서버 URL이 비어 있지 않으면 실행
+      - name: Set environment variable for Config Server URL
+        if: ${{ env.CONFIG_SERVER_URL != '' }}
+        run: |
+          echo "SPRING_CLOUD_CONFIG_URI=${{ env.CONFIG_SERVER_URL }}" >> $GITHUB_ENV
       
       - name: Code vulnerability scanning
         uses: anchore/scan-action@v3
