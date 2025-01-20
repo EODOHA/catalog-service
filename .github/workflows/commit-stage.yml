@@ -19,9 +19,11 @@ jobs:
           java-version: 17
           cache: gradle  
 
-      - name: Run Config Server (Docker)
+      # Config 서버 URL 설정 부분을 조건부로 실행
+      - name: Set environment variable for Config Server URL
+        if: ${{ secrets.CONFIG_SERVER_URL != '' }}
         run: |
-          docker run -d -p 8888:8888 --name config-server my-config-server-image
+          echo "SPRING_CLOUD_CONFIG_URI=${{ secrets.CONFIG_SERVER_URL }}" >> $GITHUB_ENV
       
       - name: Code vulnerability scanning
         uses: anchore/scan-action@v3
