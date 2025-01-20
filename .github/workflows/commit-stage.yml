@@ -5,6 +5,8 @@ jobs:
   build:
     name: Build and Test
     runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false # 로컬 환경 시 fail-fast false.
     permissions:
       contents: read
       security-events: write
