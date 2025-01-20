@@ -19,9 +19,9 @@ jobs:
           java-version: 17
           cache: gradle  
 
-      - name: Set environment variable for Config Server URL
+      - name: Run Config Server (Docker)
         run: |
-          echo "SPRING_CLOUD_CONFIG_URI=http://localhost:8888" >> $GITHUB_ENV
+          docker run -d -p 8888:8888 --name config-server my-config-server-image
       
       - name: Code vulnerability scanning
         uses: anchore/scan-action@v3
