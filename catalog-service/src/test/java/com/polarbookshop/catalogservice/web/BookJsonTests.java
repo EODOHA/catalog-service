@@ -32,6 +32,8 @@ public class BookJsonTests {
 		// 직렬화, 역직렬화에 @.id, @.version, @.createdDate, @.lastmodifiedDate 추가 가능.
 	}
 	
+	// 커밋 테스트용 주석.
+	
 	@Test
 	void testDeserialize() throws Exception {
 		// 자바 텍스트 블록 기능을 사용해, JSON 객체를 정의함.
