@@ -18,7 +18,7 @@ public class BookJsonTests {
 	
 	@Test
 	void testSerialize() throws Exception {
-		var book = new Book("1234567890", "Title", "Author", 9.90);
+		var book = Book.of("1234567890", "Title", "Author", 9.90);
 		var jsonContent = json.write(book);
 		// JsonPath 형식을 사용, JSON 객체를 탐색하고 자바의 JSON 변환을 확인함.
 		assertThat(jsonContent).extractingJsonPathStringValue("@.isbn")
@@ -29,6 +29,7 @@ public class BookJsonTests {
 			.isEqualTo(book.author());
 		assertThat(jsonContent).extractingJsonPathNumberValue("@.price")
 			.isEqualTo(book.price());
+		// 직렬화, 역직렬화에 @.id, @.version, @.createdDate, @.lastmodifiedDate 추가 가능.
 	}
 	
 	@Test
@@ -45,6 +46,6 @@ public class BookJsonTests {
 		// JSON에서 자바 객체로의 변환을 확인함.
 		assertThat(json.parse(content))
 		.usingRecursiveComparison()
-		.isEqualTo(new Book("1234567890", "Title", "Author", 9.90));
+		.isEqualTo(Book.of("1234567890", "Title", "Author", 9.90));
 	}
 }
