@@ -22,6 +22,30 @@ class CatalogServiceApplicationTests {
 	@Autowired
 	// 테스트를 위해 REST 엔드포인트를 호출할 유틸리티.
 	private WebTestClient webTestClient;
+	
+	@Test
+    void whenGetRequestWithIdThenBookReturned() {
+        var bookIsbn = "1231231230";
+        var bookToCreate = Book.of(bookIsbn, "Title", "Author", 9.90, "Polarsophia");
+        Book expectedBook = webTestClient
+                .post()
+                .uri("/books")
+                .bodyValue(bookToCreate)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(Book.class).value(book -> assertThat(book).isNotNull())
+                .returnResult().getResponseBody();
+
+        webTestClient
+                .get()
+                .uri("/books/" + bookIsbn)
+                .exchange()
+                .expectStatus().is2xxSuccessful()
+                .expectBody(Book.class).value(actualBook -> {
+                    assertThat(actualBook).isNotNull();
+                    assertThat(actualBook.isbn()).isEqualTo(expectedBook.isbn());
+                });
+    }
 
 	@Test
 	void whenPostRequestThenBookCreated() {
@@ -37,8 +61,59 @@ class CatalogServiceApplicationTests {
 				assertThat(actualBook).isNotNull(); // HTTP 응답의 본문이 널값이 아닌지 확인함.
 				assertThat(actualBook.isbn())
 					.isEqualTo(expectedBook.isbn()); // 생성된 객체가 예상과 동일한지 확인함.
-			});
-			
+			});		
 	}
+	
+	@Test
+    void whenPutRequestThenBookUpdated() {
+        var bookIsbn = "1231231232";
+        var bookToCreate = Book.of(bookIsbn, "Title", "Author", 9.90, "Polarsophia");
+        Book createdBook = webTestClient
+                .post()
+                .uri("/books")
+                .bodyValue(bookToCreate)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(Book.class).value(book -> assertThat(book).isNotNull())
+                .returnResult().getResponseBody();
+        var bookToUpdate = Book.of(createdBook.isbn(), createdBook.title(), createdBook.author(), 7.95, createdBook.publisher());
 
+        webTestClient
+                .put()
+                .uri("/books/" + bookIsbn)
+                .bodyValue(bookToUpdate)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Book.class).value(actualBook -> {
+                    assertThat(actualBook).isNotNull();
+                    assertThat(actualBook.price()).isEqualTo(bookToUpdate.price());
+                });
+    }
+	
+	@Test
+    void whenDeleteRequestThenBookDeleted() {
+        var bookIsbn = "1231231233";
+        var bookToCreate = Book.of(bookIsbn, "Title", "Author", 9.90, "Polarsophia");
+        webTestClient
+                .post()
+                .uri("/books")
+                .bodyValue(bookToCreate)
+                .exchange()
+                .expectStatus().isCreated();
+
+        webTestClient
+                .delete()
+                .uri("/books/" + bookIsbn)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        webTestClient
+                .get()
+                .uri("/books/" + bookIsbn)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody(String.class).value(errorMessage ->
+                        assertThat(errorMessage).isEqualTo("The book with ISBN " + bookIsbn + " was not found.")
+                );
+    }
 }

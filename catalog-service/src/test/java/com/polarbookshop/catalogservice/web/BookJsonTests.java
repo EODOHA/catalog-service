@@ -29,7 +29,11 @@ public class BookJsonTests {
 			.isEqualTo(book.author());
 		assertThat(jsonContent).extractingJsonPathNumberValue("@.price")
 			.isEqualTo(book.price());
-		// 직렬화, 역직렬화에 @.id, @.version, @.createdDate, @.lastmodifiedDate 추가 가능.
+		assertThat(jsonContent).extractingJsonPathStringValue("@.publisher")
+			.isEqualTo(book.publisher());
+		// 직렬화, 역직렬화에 @.id, @.version, @.createdDate, @.lastmodifiedDate
+		// null, 0인 부분은 제외 가능.
+		// 다 해보고 싶으면 임의의 값 직접 입력.
 	}
 	
 	// 커밋 테스트용 주석.
