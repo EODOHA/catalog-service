@@ -38,14 +38,26 @@ jobs:
         with:
           sarif_file: ${{ steps.scan.outputs.sarif }}
 
-      - name: Start services using Docker Compose
-        working-directory: catalog-service
+      - name: Get "config-service" container info
         run: |
-          docker-compose up -d
-          sleep 10
+          CONTAINER_ID=$(docker ps -q --filter "name=config-service")
+
+          if [ -z "$CONTAINER_ID" ]; then
+            echo "Error: 'config-service' 컨테이너가 실행 중이지 않습니다."
+            exit 1
+          else
+            echo "'config-service' 컨테이너 ID: $CONTAINER_ID"
+          fi
+
+          CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $CONTAINER_ID)
+          echo "'config-service' 컨테이너 IP: $CONTAINER_IP"
+
+          echo "CONTAINER_IP=$CONTAINER_IP" >> $GITHUB_ENV
       
       - name: Build, unit tests and integration tests
         working-directory: catalog-service
+        env:
+          CONFIG_SERVICE_IP: ${{ env.CONTAINER_IP }}
         run: |
           chmod +x gradlew
           ./gradlew build
