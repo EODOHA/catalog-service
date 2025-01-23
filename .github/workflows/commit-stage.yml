@@ -40,7 +40,7 @@ jobs:
 
       - name: Get "config-service" container info
         run: |
-          CONTAINER_ID=$(docker ps -q --filter "name=config-service")
+          CONTAINER_ID=$(docker-compose ps -q config-service)
 
           if [ -z "$CONTAINER_ID" ]; then
             echo "Error: 'config-service' 컨테이너가 실행 중이지 않습니다."
