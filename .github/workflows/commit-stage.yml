@@ -37,38 +37,9 @@ jobs:
         if: success() || failure()
         with:
           sarif_file: ${{ steps.scan.outputs.sarif }}
-
-      - name: Install Dokcer Compose
-        run: |
-          sudo curl -L "https://github.com/docker/compose/releases/download/v2.25.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-          sudo chmod +x /usr/local/bin/docker-compose
-          docker-compose --version
-
-      - name: Start Docker Compose services
-        working-directory: catalog-service
-        run: |
-          docker-compose up -d
-
-      - name: Get "config-service" container info
-        run: |
-          CONTAINER_ID=$(docker-compose ps -q config-service)
-
-          if [ -z "$CONTAINER_ID" ]; then
-            echo "Error: 'config-service' 컨테이너가 실행 중이지 않습니다."
-            exit 1
-          else
-            echo "'config-service' 컨테이너 ID: $CONTAINER_ID"
-          fi
-
-          CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $CONTAINER_ID)
-          echo "'config-service' 컨테이너 IP: $CONTAINER_IP"
-
-          echo "CONTAINER_IP=$CONTAINER_IP" >> $GITHUB_ENV
-      
+          
       - name: Build, unit tests and integration tests
         working-directory: catalog-service
-        env:
-          CONFIG_SERVICE_IP: ${{ env.CONTAINER_IP }}
         run: |
           chmod +x gradlew
           ./gradlew build
@@ -84,17 +55,20 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v3
+        
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: 17
           cache: gradle
+          
       - name: Build container image
         working-directory: catalog-service
         run: |
           chmod +x gradlew
           ./gradlew bootBuildImage --imageName ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+          
       - name: OCI image vulnerability scanning
         uses: anchore/scan-action@v3
         id: scan
@@ -103,16 +77,19 @@ jobs:
           fail-build: false
           severity-cutoff: high
           # acs-report-enable: true
+          
       - name: Upload vulnerability report
         uses: github/codeql-action/upload-sarif@v3
         if: success() || failure()
         with:
           sarif_file: ${{ steps.scan.outputs.sarif }}
+          
       - name: Log into container registry
         uses: docker/login-action@v2
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+          
       - name: Publish container image
         run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
