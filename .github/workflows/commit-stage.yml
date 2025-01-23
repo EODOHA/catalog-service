@@ -38,6 +38,17 @@ jobs:
         with:
           sarif_file: ${{ steps.scan.outputs.sarif }}
 
+      - name: Install Dokcer Compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.25.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose --version
+
+      - name: Start Docker Compose services
+        working-directory: catalog-service
+        run: |
+          docker-compose up -d
+
       - name: Get "config-service" container info
         run: |
           CONTAINER_ID=$(docker-compose ps -q config-service)
