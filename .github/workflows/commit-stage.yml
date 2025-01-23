@@ -37,6 +37,12 @@ jobs:
         if: success() || failure()
         with:
           sarif_file: ${{ steps.scan.outputs.sarif }}
+
+      - name: Start services using Docker Compose
+        working-directory: catalog-service
+        run: |
+          docker-compose up -d
+          sleep 10
       
       - name: Build, unit tests and integration tests
         working-directory: catalog-service
