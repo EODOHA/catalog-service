@@ -5,6 +5,7 @@ metadata:
   labels: # 배포에 추가할 레이블의 집합.
     app: catalog-service # 이 배포는 "app=catalog-service"라는 레이블을 갖는다.
 spec:
+  replicas: 1 # 몇 개의 파드 복제본을 배포할 것인지 설정.
   selector: # 확장할 파드를 선택하기 위해 사용할 레이블을 정의함.
     matchLabels:
       app: catalog-service
@@ -17,6 +18,10 @@ spec:
       - name: catalog-service # 파드 이름
         image: catalog-service # 컨테이너를 실행하기 위해 사용할 이미지. 태그가 정의되지 않으면 latest가 암묵적으로 사용됨.
         imagePullPolicy: IfNotPresent # 이미지가 로컬에 없는 경우에만 컨테이너 저장소에서 이미지를 다운로드 받을 것을 쿠버네티스에게 지시함.
+        lifecycle:
+          preStop:
+            exec:
+              command: [ "sh", "-c", "sleep 5" ]
         ports:
         - containerPort: 9001 # 컨테이너에 의해 노출되는 포트.
         env: # 파드로 전달되는 환경 변수의 목록.
