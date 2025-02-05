@@ -49,7 +49,7 @@ jobs:
           kubectl: 1.24.1
           kubeval: 0.16.1
           command: |
-            for %f in (k8s\*.yml k8s\*.yaml) do kubeval --strict %f
+            for f in k8s/*.yml k8s/*.yaml; do kubeval --strict "$f"; done
   package:
     name: Package and Publish
     if: ${{ github.ref == 'refs/heads/master' }}
